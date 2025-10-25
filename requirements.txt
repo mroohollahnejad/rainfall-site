@@ -1,0 +1,8 @@
+django
+gunicorn
+pandas
+openpyxl
+jdatetime
+whitenoise
+dj-database-url
+
