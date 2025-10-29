@@ -13,13 +13,16 @@ from .forms import RainRecordForm
 from django.db.models import Q
 import jdatetime
 from datetime import datetime
+from django.contrib import messages
+from .forms import LoginForm
 
+
+from django.shortcuts import redirect, render
 
 def index(request):
     if request.user.is_authenticated:
-        return redirect('enter')
-    return render(request, 'index.html')
-
+        return redirect('dashboard')
+    return redirect('login')  # به جای render ساده، مستقیماً به login هدایت شود
 
 def register_view(request):
     if request.method == 'POST':
@@ -248,3 +251,28 @@ def inline_update(request):
         return JsonResponse({'status': 'error', 'message': f'مقدار نامعتبر: {ve}'}, status=400)
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            remember = form.cleaned_data.get('remember_me')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                if not remember:
+                    request.session.set_expiry(0)  # خروج خودکار پس از بستن مرورگر
+                messages.success(request, f"{user.username} عزیز، خوش آمدید 🌦️")
+                return redirect('dashboard')
+            else:
+                messages.error(request, "❌ نام کاربری یا رمز عبور اشتباه است.")
+    else:
+        form = LoginForm()
+
+    return render(request, 'login.html', {'form': form})

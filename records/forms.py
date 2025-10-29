@@ -64,3 +64,20 @@ class RainRecordForm(forms.ModelForm):
         if commit:
             obj.save()
         return obj
+
+
+
+class LoginForm(forms.Form):
+    username = forms.CharField(
+        label="نام کاربری",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'نام کاربری خود را وارد کنید'})
+    )
+    password = forms.CharField(
+        label="رمز عبور",
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'رمز عبور'})
+    )
+    remember_me = forms.BooleanField(
+        required=False,
+        label="مرا به خاطر بسپار",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
