@@ -22,7 +22,7 @@ TIME_RANGES = [
     ('12-15','12-15'),
     ('15-18','15-18'),
     ('18-21','18-21'),
-    ('21-00','21-00'),
+    ('21-24','21-24'),
 ]
 
 # --- صفحه اصلی ---
@@ -111,38 +111,22 @@ def dashboard(request):
     start_date = request.GET.get("start_date", "")
     end_date = request.GET.get("end_date", "")
 
-    records = RainRecord.objects.select_related('station', 'user').order_by('-timestamp')
+    records = RainRecord.objects.select_related('station','user').order_by('-timestamp')
 
-    # فیلتر ایستگاه
     if station_filter != "all":
         records = records.filter(station_id=station_filter)
 
-    # فیلتر بازه تاریخ
-    if start_date:
-        try:
-            jdate_start = jdatetime.datetime.strptime(start_date, '%Y/%m/%d')
-            gdate_start = jdate_start.togregorian().replace(hour=0, minute=0, second=0)
-        except Exception:
-            gdate_start = None
-    else:
-        gdate_start = None
-
-    if end_date:
-        try:
-            jdate_end = jdatetime.datetime.strptime(end_date, '%Y/%m/%d')
-            gdate_end = jdate_end.togregorian().replace(hour=23, minute=59, second=59)
-        except Exception:
-            gdate_end = None
-    else:
-        gdate_end = None
-
-    if gdate_start and gdate_end:
-        records = records.filter(timestamp__range=(gdate_start, gdate_end))
-    elif gdate_start:
-        records = records.filter(timestamp__gte=gdate_start)
-    elif gdate_end:
-        records = records.filter(timestamp__lte=gdate_end)
-    # اگر هیچ تاریخی انتخاب نشده باشد، کل رکوردها نمایش داده می‌شوند
+    try:
+        if start_date:
+            j_start = jdatetime.datetime.strptime(start_date, '%Y/%m/%d')
+            g_start = j_start.togregorian().replace(hour=0, minute=0, second=0)
+            records = records.filter(timestamp__gte=g_start)
+        if end_date:
+            j_end = jdatetime.datetime.strptime(end_date, '%Y/%m/%d')
+            g_end = j_end.togregorian().replace(hour=23, minute=59, second=59)
+            records = records.filter(timestamp__lte=g_end)
+    except:
+        pass
 
     stations = Station.objects.all()
     return render(request, "dashboard.html", {
@@ -209,41 +193,3 @@ def export_excel(request):
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=rainfall_records.xlsx'
     return response
-
-#-----------------------------------------------------
-from django.shortcuts import render
-from django.db.models import Sum
-from persiantools.jdatetime import JalaliDate
-from .models import RainRecord
-
-def daily_rainfall(request):
-    # جمع بارندگی سه ساعته بر اساس ایستگاه و تاریخ (فقط قسمت تاریخ timestamp)
-    data = RainRecord.objects.values('station__name', 'timestamp__date') \
-        .annotate(daily_total=Sum('rainfall_mm')) \
-        .order_by('timestamp__date')
-
-    # تبدیل تاریخ میلادی به شمسی
-    daily_data = []
-    for row in data:
-        daily_data.append({
-            'station': row['station__name'],
-            'date': JalaliDate(row['timestamp__date']).strftime('%Y/%m/%d'),
-            'daily_total': row['daily_total']
-        })
-
-    return render(request, "daily_rainfall.html", {'daily_data': daily_data})
-
-
-#----------------------------------------------------------
-from django.http import JsonResponse
-
-def daily_rainfall_json(request):
-    daily_data = (
-        RainRecord.objects
-        .annotate(date=TruncDate('timestamp'))
-        .values('station', 'date')
-        .annotate(daily_total=Sum('rainfall_mm'))
-        .order_by('-date')
-    )
-
-    return JsonResponse(list(daily_data), safe=False)

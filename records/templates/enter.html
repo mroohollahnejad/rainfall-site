@@ -1,54 +1,72 @@
-{% extends 'base.html' %}
-
-{% block title %}ثبت رکورد | سامانه بارش{% endblock %}
+{% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-<div class="d-flex justify-content-center mt-4">
-  <div class="card shadow-sm p-4 w-100" style="max-width: 500px;">
-    <h4 class="text-center text-primary mb-4">➕ ثبت داده بارندگی</h4>
+<div class="container mt-4">
 
-    {% if success %}
-      <div class="alert alert-success">{{ success }}</div>
-    {% endif %}
-    {% if errors %}
-      <div class="alert alert-danger">
-        {% for field, error_list in errors.items %}
-          <strong>{{ field }}:</strong> {{ error_list|join:", " }} <br>
+    <h2 class="mb-3">ثبت داده بارش سه‌ساعته</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
         {% endfor %}
-      </div>
     {% endif %}
 
-    <form method="post">
-      {% csrf_token %}
-      <div class="mb-3">
-        {{ form.station.label_tag }}
-        {{ form.station }}
-      </div>
-      <div class="mb-3">
-        {{ form.date.label_tag }}
-        {{ form.date }}
-      </div>
-      <div class="row">
-        <div class="col mb-3">
-          {{ form.hour.label_tag }}
-          {{ form.hour }}
-        </div>
-        <div class="col mb-3">
-          {{ form.minute.label_tag }}
-          {{ form.minute }}
-        </div>
-      </div>
-      <div class="mb-3">
-        {{ form.rainfall_mm.label_tag }}
-        {{ form.rainfall_mm }}
-      </div>
+    <form method="post" class="row g-3">
+        {% csrf_token %}
 
-      <button type="submit" class="btn btn-primary w-100">ثبت رکورد</button>
+        <div class="col-md-3">
+            <label class="form-label"><strong>ایستگاه</strong></label>
+            <select name="station" class="form-select" required>
+                <option value="" disabled selected>انتخاب ایستگاه</option>
+                {% for st in stations %}
+                <option value="{{ st.id }}">{{ st.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label"><strong>تاریخ</strong></label>
+            <input type="text" id="date" name="date" class="form-control" placeholder="YYYY/MM/DD" required>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label"><strong>بازه سه‌ساعته</strong></label>
+            <select name="time_range" class="form-select" required>
+                {% for code, label in time_choices %}
+                <option value="{{ code }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label"><strong>میزان بارش (mm)</strong></label>
+            <input type="number" step="0.1" name="rainfall_mm" class="form-control" required>
+        </div>
+
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">ثبت داده</button>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">بازگشت به داشبورد</a>
+        </div>
     </form>
 
-    <div class="mt-3 text-center">
-      <a href="{% url 'dashboard' %}" class="btn btn-secondary w-100">بازگشت به داشبورد</a>
-    </div>
-  </div>
 </div>
+
+<!-- کتابخانه تاریخ شمسی -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker/dist/css/persian-datepicker.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/persian-datepicker/dist/js/persian-datepicker.min.js"></script>
+
+<script>
+$(function(){
+    $('#date').persianDatepicker({
+        format: 'YYYY/MM/DD',
+        autoClose: true
+    });
+});
+</script>
+
 {% endblock %}

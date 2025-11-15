@@ -1,9 +1,8 @@
 from django import forms
 from .models import RainRecord, Station
 
-# --- فرم ثبت/ویرایش رکورد بارندگی ---
 class RainRecordForm(forms.ModelForm):
-    # انتخاب ایستگاه
+    # انتخاب ایستگاه از لیست مدل
     station = forms.ModelChoiceField(
         queryset=Station.objects.all(),
         label='ایستگاه',
@@ -18,27 +17,16 @@ class RainRecordForm(forms.ModelForm):
         widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'مثلاً 12.5'})
     )
 
-    # بازه سه ساعته
-    TIME_CHOICES = [
-        ('00-03', '۰۰-۰۳'), ('03-06', '۰۳-۰۶'), ('06-09', '۰۶-۰۹'), ('09-12', '۰۹-۱۲'),
-        ('12-15', '۱۲-۱۵'), ('15-18', '۱۵-۱۸'), ('18-21', '۱۸-۲۱'), ('21-00', '۲۱-۰۰')
-    ]
-    time_range = forms.ChoiceField(
-        choices=TIME_CHOICES,
-        label='بازه ساعت',
-        widget=forms.Select(attrs={'class': 'form-select'})
-    )
-
     class Meta:
         model = RainRecord
-        fields = ['station', 'rainfall_mm', 'time_range']
+        # فقط فیلدهای واقعی مدل
+        fields = ['station', 'rainfall_mm']
 
-
-# --- فرم ورود ---
+# فرم ورود (Login) بدون تغییر
 class LoginForm(forms.Form):
     username = forms.CharField(
         label="نام کاربری",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'نام کاربری'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'نام کاربری خود را وارد کنید'})
     )
     password = forms.CharField(
         label="رمز عبور",
@@ -49,4 +37,3 @@ class LoginForm(forms.Form):
         label="مرا به خاطر بسپار",
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
-

@@ -13,17 +13,5 @@ class RainRecord(models.Model):
     timestamp = models.DateTimeField()
     rainfall_mm = models.FloatField()
 
-    TIME_CHOICES = [
-        ('00-03', '00-03'),
-        ('03-06', '03-06'),
-        ('06-09', '06-09'),
-        ('09-12', '09-12'),
-        ('12-15', '12-15'),
-        ('15-18', '15-18'),
-        ('18-21', '18-21'),
-        ('21-00', '21-00'),
-    ]
-    time_range = models.CharField(max_length=5, choices=TIME_CHOICES, default='00-03')
-
     def __str__(self):
-        return f"{self.station} - {self.timestamp.strftime('%Y/%m/%d')} - {self.rainfall_mm}mm - {self.time_range}"
+        return f"{self.station} - {self.timestamp.strftime('%Y/%m/%d %H:%M')} - {self.rainfall_mm}mm"

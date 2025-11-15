@@ -1,6 +1,5 @@
 from django.urls import path
 from . import views
-from .views import daily_rainfall, daily_rainfall_json
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -17,8 +16,4 @@ urlpatterns = [
 
     # بروزرسانی inline
     path('inline_update/', views.inline_update, name='inline_update'),
-    path('daily_rainfall/', daily_rainfall, name='daily_rainfall'),
-    path('daily-rainfall-json/', daily_rainfall_json, name='daily_rainfall_json'),
 ]
-
-

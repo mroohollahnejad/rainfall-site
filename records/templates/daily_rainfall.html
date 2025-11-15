@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}بارندگی روزانه{% endblock %}
+
+{% block content %}
+<div class="card mt-3">
+    <div class="card-header bg-primary text-white">
+        مجموع بارندگی روزانه (بر اساس داده سه‌ساعته)
+    </div>
+
+    <div class="card-body">
+        <table class="table table-bordered table-striped" id="daily_table">
+            <thead>
+                <tr>
+                    <th>ایستگاه</th>
+                    <th>تاریخ شمسی</th>
+                    <th>بارندگی روزانه (میلی‌متر)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in daily_data %}
+                <tr>
+                    <td>{{ row.station }}</td>
+                    <td>{{ row.date }}</td>
+                    <td>{{ row.daily_total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
